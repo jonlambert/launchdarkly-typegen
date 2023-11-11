@@ -1,0 +1,41 @@
+name: Build & Release
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Setup pnpm
+        run: |
+          npm install -g pnpm
+
+      - run: pnpm install
+
+      - name: Build Project
+        run: |
+          pnpm build
+
+      - name: Release Project
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "//registry.npmjs.org/:_authToken=$NPM_AUTH_TOKEN" > ~/.npmrc
+          pnpm release
