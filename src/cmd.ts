@@ -59,7 +59,11 @@ async function main() {
   ]);
 
   const rendered = template({
-    flags: flags.items.map((item) => ({ key: item.key, type: item.kind })),
+    flags: flags.items.map((item) => ({
+      key: item.key,
+      type: item.kind,
+      description: item.description,
+    })),
     environments: envs.items.map((env) => env.key),
     envTypeName: options.envTypeName,
     flagInterfaceName: options.flagInterfaceName,
@@ -74,7 +78,9 @@ async function main() {
     }
 
     await writeFile(path, rendered);
-    console.log(`${flags.items.length} flag(s), ${envs.items.length} env(s) saved to ${path}`);
+    console.log(
+      `${flags.items.length} flag(s), ${envs.items.length} env(s) saved to ${path}`
+    );
   } else {
     console.log(rendered);
   }

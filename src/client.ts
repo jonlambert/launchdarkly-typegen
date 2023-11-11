@@ -1,6 +1,6 @@
 import axios from 'axios';
 import invariant from 'tiny-invariant';
-import { array, literal, object, parse, string } from 'valibot';
+import { array, literal, object, optional, parse, string } from 'valibot';
 
 function getApiKeyFromEnv() {
   invariant(
@@ -20,6 +20,7 @@ export const getLaunchDarklyFlagsResponse = object({
     object({
       kind: literal('boolean'),
       key: string(),
+      description: optional(string()),
     })
   ),
 });
