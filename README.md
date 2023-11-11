@@ -6,7 +6,7 @@ _Note: This is a third-party tool with no affiliation to LaunchDarkly._
 
 ## Introduction
 
-This CLI tool will fetch flags from a LaunchDarkly project and render them to a TypeScript definition.
+This CLI tool will fetch flags from a LaunchDarkly project and render them to TypeScript definitions.
 
 The output can then be imported across your application to give build-time checks to your flag evaluations.
 
