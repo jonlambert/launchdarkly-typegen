@@ -32,10 +32,10 @@ npm install -D launchdarkly-typegen
 ## Usage
 
 ```bash
-launchdarkly-gen
+launchdarkly-typegen
 
 Usage:
-  $ launchdarkly-gen <command> [options]
+  $ launchdarkly-typegen <command> [options]
 
 Options:
   --output [file]               Path to generated file (default: output to stdout)

@@ -9,7 +9,7 @@ import cac from 'cac';
 import { existsSync } from 'node:fs';
 import { object, optional, string, parse as validate, boolean } from 'valibot';
 
-const cli = cac('launchdarkly-gen');
+const cli = cac('launchdarkly-typegen');
 
 config({ path: resolve(process.cwd(), '.env') });
 
