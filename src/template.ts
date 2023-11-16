@@ -1,8 +1,18 @@
+import { LaunchDarklyFlag } from './client';
+
 interface TemplateArgs {
-  flags: { key: string; type: string; description?: string }[];
+  flags: LaunchDarklyFlag[];
   environments: string[];
   flagInterfaceName: string;
   envTypeName: string;
+}
+
+export function renderFlagType(flag: LaunchDarklyFlag) {
+  if (flag.kind === 'boolean') return 'boolean';
+
+  return flag.variations
+    .map((variation) => `{ name: '${variation.name}', value: unknown }`)
+    .join(' | ');
 }
 
 export function template({
@@ -21,7 +31,7 @@ export function template({
   `
         : '';
 
-      return `  ${comment}'${flag.key}': boolean;`;
+      return `  ${comment}'${flag.key}': ${renderFlagType(flag)};`;
     })
     .join('\n');
 

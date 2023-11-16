@@ -59,11 +59,7 @@ async function main() {
   ]);
 
   const rendered = template({
-    flags: flags.items.map((item) => ({
-      key: item.key,
-      type: item.kind,
-      description: item.description,
-    })),
+    flags: flags.items,
     environments: envs.items.map((env) => env.key),
     envTypeName: options.envTypeName,
     flagInterfaceName: options.flagInterfaceName,

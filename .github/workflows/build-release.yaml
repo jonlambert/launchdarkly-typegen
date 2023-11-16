@@ -29,6 +29,8 @@ jobs:
 
       - run: pnpm install
 
+      - run: pnpm test
+
       - name: Build Project
         run: |
           pnpm build
