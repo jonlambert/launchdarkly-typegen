@@ -27,6 +27,7 @@ export function template({
 }: TemplateArgs) {
   const envs = environments.map((env) => `'${env}'`).join(' | ');
   const flagLines = flags
+    .sort((a, b) => a.key.localeCompare(b.key))
     .map((flag) => {
       const comment = flag.description
         ? `/**

@@ -33,6 +33,11 @@ describe('template', () => {
     const args = {
       flags: [
         {
+          key: 'feature2',
+          kind: 'boolean',
+          name: 'Feature 2',
+        } satisfies LaunchDarklyFlag,
+        {
           key: 'feature1',
           kind: 'boolean',
           name: 'Feature 1',
@@ -48,6 +53,7 @@ describe('template', () => {
 
 export interface Flags {
   'feature1': boolean;
+  'feature2': boolean;
 }
 
 export type AppFlag = keyof Flags;
