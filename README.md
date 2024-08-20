@@ -47,9 +47,9 @@ Options:
 
 ```
 
-## TODO
+## Features
 
 - [x] Fetch flag keys and their types
 - [x] Fetch environment keys
-- [ ] Support >100 flags/environments
+- [x] Output to stdout or write to file
 - [ ] Support non-boolean flag types

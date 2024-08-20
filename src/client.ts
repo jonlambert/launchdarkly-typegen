@@ -55,7 +55,7 @@ export const getLaunchDarklyEnvironmentsResponse = object({
 
 export async function getAllFlags(projectKey: string, apiKey?: string) {
   const response = await getClient(getApiKey(apiKey)).get(
-    `/v2/flags/${projectKey}?limit=100`
+    `/v2/flags/${projectKey}?limit=1000`
   );
   const data = safeParse(getLaunchDarklyFlagsResponse, response.data);
   if (!data.success) {
