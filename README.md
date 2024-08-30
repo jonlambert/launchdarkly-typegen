@@ -26,6 +26,13 @@ export type FlagEnvironment = 'staging' | 'production';
 ## Installation
 
 ```bash
+npx launchdarkly-typegen@latest
+```
+
+or
+
+```bash
+# Lock a version
 npm install -D launchdarkly-typegen
 ```
 
