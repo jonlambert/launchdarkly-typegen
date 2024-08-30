@@ -1,3 +1,4 @@
+import { Project } from 'ts-morph';
 import { LaunchDarklyFlag } from './client';
 
 interface TemplateArgs {
@@ -7,8 +8,10 @@ interface TemplateArgs {
   envTypeName: string;
 }
 
-export function renderFlagType(flag: LaunchDarklyFlag) {
-  if (flag.kind === 'boolean') return 'boolean';
+function createFlagType(flag: LaunchDarklyFlag): string {
+  if (flag.kind === 'boolean') {
+    return 'boolean';
+  }
 
   return flag.variations
     .map((variation) => `{ name: '${variation.name}', value: unknown }`)
@@ -24,30 +27,49 @@ export function template({
   environments,
   flagInterfaceName,
   envTypeName,
-}: TemplateArgs) {
-  const envs = environments.map((env) => `'${env}'`).join(' | ');
-  const flagLines = flags
+}: TemplateArgs): string {
+  const project = new Project();
+  const sourceFile = project.createSourceFile('generated.ts', '', {
+    overwrite: true,
+  });
+
+  // Add the header comment
+  sourceFile.insertStatements(0, `${HEADER}\n`);
+
+  // Create the flag interface
+  const flagInterface = sourceFile.addInterface({
+    name: flagInterfaceName,
+    isExported: true,
+  });
+
+  flags
     .sort((a, b) => a.key.localeCompare(b.key))
-    .map((flag) => {
-      const comment = flag.description
-        ? `/**
-   * ${flag.description}
-   */
-  `
-        : '';
+    .forEach((flag) => {
+      const property = flagInterface.addProperty({
+        name: `'${flag.key}'`,
+        type: createFlagType(flag),
+      });
 
-      return `  ${comment}'${flag.key}': ${renderFlagType(flag)};`;
-    })
-    .join('\n');
+      if (flag.description) {
+        property.addJsDoc({
+          description: flag.description,
+        });
+      }
+    });
 
-  return `${HEADER}
+  // Create the AppFlag type alias
+  sourceFile.addTypeAlias({
+    name: 'AppFlag',
+    type: `keyof ${flagInterfaceName}`,
+    isExported: true,
+  });
 
-export interface ${flagInterfaceName} {
-${flagLines}
-}
+  // Create the environment type alias
+  sourceFile.addTypeAlias({
+    name: envTypeName,
+    type: environments.map((env) => `'${env}'`).join(' | '),
+    isExported: true,
+  });
 
-export type AppFlag = keyof ${flagInterfaceName};
-
-export type ${envTypeName} = ${envs};
-`;
+  return sourceFile.getFullText();
 }
