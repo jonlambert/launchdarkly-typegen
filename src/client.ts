@@ -1,5 +1,4 @@
-import axios from 'axios';
-import invariant from 'tiny-invariant';
+import axios, { AxiosError } from "axios";
 import {
   array,
   literal,
@@ -10,15 +9,18 @@ import {
   unknown,
   Output,
   safeParse,
-} from 'valibot';
-import { LaunchDarklyUnexpectedResponse } from './errors';
-import { LAUNCHDARKLY_BASE_URL } from './constants';
+} from "valibot";
+import {
+  LaunchDarklyAuthorizationError,
+  CommandMissingAuthKeyError,
+  LaunchDarklyUnexpectedResponse,
+} from "./errors";
+import { LAUNCHDARKLY_BASE_URL } from "./constants";
 
 function getApiKeyFromEnv() {
-  invariant(
-    process.env.LAUNCHDARKLY_API_KEY,
-    'LAUNCHDARKLY_API_KEY must be in the environment or supplied via --api-key'
-  );
+  if (!process.env.LAUNCHDARKLY_API_KEY) {
+    throw new CommandMissingAuthKeyError();
+  }
 
   return process.env.LAUNCHDARKLY_API_KEY;
 }
@@ -29,13 +31,13 @@ function getApiKey(apiKey: string | undefined) {
 
 const flagSchema = union([
   object({
-    kind: literal('boolean'),
+    kind: literal("boolean"),
     key: string(),
     description: optional(string()),
     name: string(),
   }),
   object({
-    kind: literal('multivariate'),
+    kind: literal("multivariate"),
     key: string(),
     description: optional(string()),
     name: string(),
@@ -57,10 +59,13 @@ export async function getAllFlags(projectKey: string, apiKey?: string) {
   const response = await getClient(getApiKey(apiKey)).get(
     `/v2/flags/${projectKey}?limit=1000`
   );
+
   const data = safeParse(getLaunchDarklyFlagsResponse, response.data);
+
   if (!data.success) {
     throw new LaunchDarklyUnexpectedResponse();
   }
+
   return data.output;
 }
 
@@ -68,16 +73,29 @@ export async function getAllEnvironments(projectKey: string, apiKey?: string) {
   const response = await getClient(getApiKey(apiKey)).get(
     `/v2/projects/${projectKey}/environments?limit=100`
   );
+
   const data = safeParse(getLaunchDarklyEnvironmentsResponse, response.data);
+
   if (!data.success) {
     throw new LaunchDarklyUnexpectedResponse();
   }
+
   return data.output;
 }
 
 function getClient(apiKey: string) {
-  return axios.create({
+  const client = axios.create({
     headers: { Authorization: apiKey },
     baseURL: LAUNCHDARKLY_BASE_URL,
   });
+
+  client.interceptors.response.use(undefined, (error: AxiosError) => {
+    if (error.response?.status === 401) {
+      throw new LaunchDarklyAuthorizationError();
+    }
+
+    throw error;
+  });
+
+  return client;
 }

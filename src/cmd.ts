@@ -1,40 +1,47 @@
 #!/usr/bin/env node
-import { getAllEnvironments, getAllFlags } from './client';
-import { mkdir, writeFile } from 'node:fs/promises';
-import { dirname, parse, resolve } from 'node:path';
-import { template } from './template';
-import { config } from 'dotenv';
+import { getAllEnvironments, getAllFlags } from "./client";
+import { mkdir, writeFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
+import { template } from "./template";
+import { config } from "dotenv";
 
-import cac from 'cac';
-import { existsSync } from 'node:fs';
-import { object, optional, string, parse as validate, boolean } from 'valibot';
+import cac from "cac";
+import { existsSync } from "node:fs";
+import {
+  object,
+  optional,
+  string,
+  parse as validate,
+  boolean,
+  safeParse,
+} from "valibot";
 
-const cli = cac('launchdarkly-typegen');
+const cli = cac("launchdarkly-typegen");
 
-config({ path: resolve(process.cwd(), '.env') });
+config({ path: resolve(process.cwd(), ".env") });
 
 cli.option(
-  '--output [file]',
-  'Path to generated file (default: output to stdout)'
+  "--output [file]",
+  "Path to generated file (default: output to stdout)"
 );
-cli.option('--project [project]', 'LaunchDarkly project key', {
-  default: 'default',
+cli.option("--project [project]", "LaunchDarkly project key", {
+  default: "default",
 });
 cli.option(
-  '--flag-interface-name [name]',
-  'Name of the generated flag interface',
+  "--flag-interface-name [name]",
+  "Name of the generated flag interface",
   {
-    default: 'AppFlagSet',
+    default: "AppFlagSet",
   }
 );
 cli.option(
-  '--env-type-name [name]',
-  'Name of the generated environment union type',
-  { default: 'FlagEnvironment' }
+  "--env-type-name [name]",
+  "Name of the generated environment union type",
+  { default: "FlagEnvironment" }
 );
 cli.option(
-  '--api-key [key]',
-  'LaunchDarkly API key (if not set, will attempt to use LAUNCHDARKLY_API_KEY from the environment)'
+  "--api-key [key]",
+  "LaunchDarkly API key (if not set, will attempt to use LAUNCHDARKLY_API_KEY from the environment)"
 );
 cli.help();
 
@@ -49,7 +56,15 @@ const optionsSchema = object({
 
 async function main() {
   const { options: rawOptions } = cli.parse();
-  const options = validate(optionsSchema, rawOptions);
+  const optionsResult = safeParse(optionsSchema, rawOptions);
+
+  if (!optionsResult.success) {
+    console.log("Invalid arguments: ", optionsResult.issues.map(issue => `${issue.input}: ${issue.message}`).join(', '));
+    cli.outputHelp();
+    return;
+  }
+
+  const options = optionsResult.output;
 
   if (options.help) return;
 
