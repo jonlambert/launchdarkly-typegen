@@ -42,7 +42,7 @@ npm install -D launchdarkly-typegen
 launchdarkly-typegen
 
 Usage:
-  $ launchdarkly-typegen <command> [options]
+  $ npx launchdarkly-typegen@latest <command> [options]
 
 Options:
   --output [file]               Path to generated file (default: output to stdout)
