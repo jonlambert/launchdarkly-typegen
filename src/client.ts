@@ -17,7 +17,7 @@ import { LAUNCHDARKLY_BASE_URL } from './constants';
 function getApiKeyFromEnv() {
   invariant(
     process.env.LAUNCHDARKLY_API_KEY,
-    'LAUNCHDARKLY_API_KEY must be in the environment'
+    'LAUNCHDARKLY_API_KEY must be in the environment or supplied via --api-key'
   );
 
   return process.env.LAUNCHDARKLY_API_KEY;
